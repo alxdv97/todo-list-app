@@ -1,6 +1,6 @@
 package com.todolist.todo.controllers;
 
-import com.todolist.todo.entities.ToDo;
+import com.todolist.todo.models.ToDo;
 import com.todolist.todo.exceptions.ToDoNotFoundException;
 import com.todolist.todo.services.ToDoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +33,8 @@ public class ToDoController {
     }
 
     @PostMapping
-    public ResponseEntity<ToDo> addToDo(@RequestBody ToDo todo) {
-        return new ResponseEntity<>(service.create(todo), HttpStatus.OK);
+    public ToDo addToDo(@RequestBody ToDo todo) {
+        return service.create(todo);
     }
 
     @PutMapping("/{id}")
@@ -44,7 +44,7 @@ public class ToDoController {
             service.update(Long.parseLong(id), todo);
             return new ResponseEntity<>(id, HttpStatus.OK);
         } catch (ToDoNotFoundException e) {
-            return new ResponseEntity<>(id, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(id, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -54,7 +54,7 @@ public class ToDoController {
             service.delete(Long.parseLong(id));
             return new ResponseEntity<>(id, HttpStatus.OK);
         } catch (ToDoNotFoundException e) {
-            return new ResponseEntity<>(id, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(id, HttpStatus.NOT_FOUND);
         }
     }
 }

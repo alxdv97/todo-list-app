@@ -1,6 +1,6 @@
 package com.todolist.todo.services;
 
-import com.todolist.todo.entities.ToDo;
+import com.todolist.todo.models.ToDo;
 import com.todolist.todo.exceptions.ToDoNotFoundException;
 import com.todolist.todo.repositories.ToDoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,8 @@ public class ToDoServiceImpl implements ToDoService {
 
     @Override
     public ToDo create(ToDo todo) {
-        return repository.save(todo);
+        ToDo toDoForDB = new ToDo(todo.getUserId(), todo.getText());
+        return repository.save(toDoForDB);
     }
 
     @Override
@@ -29,15 +30,12 @@ public class ToDoServiceImpl implements ToDoService {
     }
 
     @Override
-    public boolean update(Long id, ToDo todo) throws ToDoNotFoundException {
+    public void update(Long id, ToDo todo) throws ToDoNotFoundException {
         ToDo todoFromDB = repository.findById(id)
                 .orElseThrow(ToDoNotFoundException::new);
         if (todo.getText() != null) {
             todoFromDB.setText(todo.getText());
             repository.save(todoFromDB);
-            return true;
-        } else {
-            return false;
         }
     }
 

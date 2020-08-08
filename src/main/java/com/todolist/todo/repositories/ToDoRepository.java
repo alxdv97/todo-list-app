@@ -1,6 +1,6 @@
 package com.todolist.todo.repositories;
 
-import com.todolist.todo.entities.ToDo;
+import com.todolist.todo.models.ToDo;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

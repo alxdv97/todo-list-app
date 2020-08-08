@@ -1,4 +1,4 @@
-package com.todolist.todo.services;
+package com.todolist.todo.security;
 
 import com.todolist.todo.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import com.todolist.todo.entities.ToDoUser;
+import com.todolist.todo.models.ToDoUser;
 
 @Service
 public class ToDoUserDetailsService implements UserDetailsService {
@@ -25,11 +25,10 @@ public class ToDoUserDetailsService implements UserDetailsService {
         if (myUser == null) {
             throw new UsernameNotFoundException("Unknown user: " + userName);
         }
-        UserDetails user = User.builder()
+        return User.builder()
                 .username(myUser.getUserName())
                 .password(myUser.getPassword())
                 .roles("user")
                 .build();
-        return user;
     }
 }

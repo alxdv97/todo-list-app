@@ -1,51 +1,82 @@
 package com.todolist.todo.controllers;
 
+import com.todolist.todo.models.ToDoUser;
 import com.todolist.todo.security.AuthRequest;
 import com.todolist.todo.security.AuthResponse;
-import com.todolist.todo.security.JwtUtil;
-import org.springframework.security.core.Authentication;
+import com.todolist.todo.security.jwt.JwtTokenProvider;
+import com.todolist.todo.security.jwt.blacklist.JwtBlacklistService;
+import com.todolist.todo.services.ToDoUserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 public class AuthController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
+
+    private final JwtTokenProvider jwtTokenProvider;
+
+    private final ToDoUserService userService;
+
+    private final JwtBlacklistService blacklistService;
 
     @Autowired
-    JwtUtil jwtTokenUtil;
+    public AuthController(AuthenticationManager authenticationManager,
+                          JwtTokenProvider jwtTokenProvider,
+                          ToDoUserService userService,
+                          JwtBlacklistService blacklistService) {
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.userService = userService;
+        this.blacklistService = blacklistService;
+    }
 
-    @PostMapping("/signin")
-    @ResponseStatus(HttpStatus.OK)
-    public AuthResponse createAuthToken(@RequestBody AuthRequest authRequest) {
-        Authentication authentication;
+    @PostMapping("login")
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
         try {
-            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getName(), authRequest.getPassword()));
-            System.out.println(authentication);
-        } catch (BadCredentialsException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Имя или пароль неправильны", e);
+            String userName = request.getUserName();
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userName,
+                    request.getPassword()));
+            ToDoUser user = userService.findByUserName(userName);
+
+            if (user == null) {
+                throw new UsernameNotFoundException("User with username: " + userName + " not found");
+            }
+
+            String token = jwtTokenProvider.createToken(userName);
+
+            return ResponseEntity.ok(new AuthResponse(userName, token));
+        } catch (AuthenticationException e) {
+            throw new BadCredentialsException("Invalid username or password");
         }
-
-        final String jwt = jwtTokenUtil.generateToken((UserDetails) authentication.getPrincipal());
-        System.out.println(jwt);
-
-        return new AuthResponse(jwt);
     }
 
-    @GetMapping("/logout")
-    @ResponseStatus(HttpStatus.OK)
-    public void invalidateToken() {
-        //todo how to invalidate token&&?
+    @PostMapping("registration")
+    public ResponseEntity<ToDoUser> registration(@RequestBody ToDoUser user) {
+        return ResponseEntity.ok(userService.register(user));
     }
+
+    //TODO: how to get info about user in @GET??
+//    @GetMapping("signout")
+//    public void signout(){
+//
+//    }
+
+    @PostMapping("signout")
+    public ResponseEntity<AuthResponse> logout(@RequestBody AuthRequest request) {
+
+        String token = jwtTokenProvider.createToken(request.getUserName());
+        blacklistService.storeInBlackList(token);
+
+        return ResponseEntity.ok(new AuthResponse(request.getUserName(), token));
+    }
+
 }

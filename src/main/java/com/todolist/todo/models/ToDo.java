@@ -1,18 +1,27 @@
-package com.todolist.todo.entities;
+package com.todolist.todo.models;
 
 import javax.persistence.*;
 
 @Entity
-@Table(name = "todo_table")
+@Table(name = "todos")
 public class ToDo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "todo_id")
     private Long id;
+
+    @Column(name = "user_id", nullable = false)
     private Long userId;
+    @Column(name = "text", nullable = false, length = 150)
     private String text;
 
     public ToDo() {
+    }
+
+    public ToDo(Long userId, String text) {
+        this.userId = userId;
+        this.text = text;
     }
 
     public Long getUserId() {

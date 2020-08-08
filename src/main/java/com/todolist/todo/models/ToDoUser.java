@@ -1,22 +1,28 @@
-package com.todolist.todo.entities;
+package com.todolist.todo.models;
 
-import com.sun.istack.NotNull;
 
 import javax.persistence.*;
 
 @Entity
-@Table(name = "user_table")
+@Table(name = "users")
 public class ToDoUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "user_id")
     private Long id;
-    @NotNull
+
+    @Column(name = "user_name", nullable = false)
     private String userName;
-    @NotNull
+    @Column(name = "password", nullable = false)
     private String password;
 
     public ToDoUser() {
+    }
+
+    public ToDoUser(String userName, String password) {
+        this.userName = userName;
+        this.password = password;
     }
 
     public Long getId() {

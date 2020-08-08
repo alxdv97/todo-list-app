@@ -1,20 +1,27 @@
 package com.todolist.todo.security;
 
 public class AuthResponse {
-    private String jwtToken;
+    private String userName;
+    private String token;
 
-    public AuthResponse() {
+    public AuthResponse(String userName, String jwtToken) {
+        this.userName = userName;
+        this.token = jwtToken;
     }
 
-    public AuthResponse(String jwtToken) {
-        this.jwtToken = jwtToken;
+    public String getUserName() {
+        return userName;
     }
 
-    public String getJwtToken() {
-        return jwtToken;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
-    public void setJwtToken(String jwtToken) {
-        this.jwtToken = jwtToken;
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }
