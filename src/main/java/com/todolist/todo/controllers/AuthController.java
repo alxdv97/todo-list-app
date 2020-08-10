@@ -60,8 +60,10 @@ public class AuthController {
     }
 
     @PostMapping("registration")
-    public ResponseEntity<ToDoUser> registration(@RequestBody ToDoUser user) {
-        return ResponseEntity.ok(userService.register(user));
+    public ResponseEntity<AuthResponse> registration(@RequestBody ToDoUser user) {
+        userService.register(user);
+        String token = jwtTokenProvider.createToken(user.getUserName());
+        return ResponseEntity.ok(new AuthResponse(user.getUserName(), token));
     }
 
     //TODO: how to get info about user in @GET??

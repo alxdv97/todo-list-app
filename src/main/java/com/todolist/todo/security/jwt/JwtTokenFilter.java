@@ -15,15 +15,20 @@ import java.io.IOException;
 
 public class JwtTokenFilter extends GenericFilterBean {
 
-    private JwtTokenProvider tokenProvider;
+
+    private final JwtTokenProvider tokenProvider;
+
+    // TODO: strange - cannot autowired
+    private final JwtBlacklistService blacklistService;
 
     @Autowired
-    private JwtBlacklistService blacklistService;
-
-    @Autowired
-    public JwtTokenFilter(JwtTokenProvider tokenProvider) {
+    public JwtTokenFilter(JwtTokenProvider tokenProvider, JwtBlacklistService blacklistService) {
         this.tokenProvider = tokenProvider;
+        this.blacklistService = blacklistService;
     }
+
+
+
 
     @Override
     public void doFilter(ServletRequest servletRequest,
@@ -43,4 +48,5 @@ public class JwtTokenFilter extends GenericFilterBean {
         }
         filterChain.doFilter(servletRequest, servletResponse);
     }
+
 }

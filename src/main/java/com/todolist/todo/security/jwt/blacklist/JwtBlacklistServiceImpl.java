@@ -7,7 +7,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class JwtBlacklistServiceImpl implements JwtBlacklistService {
 
-    JwtBlacklistRepository blacklist;
+
+    private final JwtBlacklistRepository blacklist;
 
     @Autowired
     public JwtBlacklistServiceImpl(JwtBlacklistRepository blacklist) {
@@ -16,7 +17,7 @@ public class JwtBlacklistServiceImpl implements JwtBlacklistService {
 
     @Override
     public boolean isInBlacklist(String jwtToken) {
-        return blacklist.findById(jwtToken).isEmpty();
+        return blacklist.findById(jwtToken).isPresent();
     }
 
     @Override
