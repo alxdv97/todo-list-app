@@ -2,6 +2,7 @@ package com.todolist.todo.models;
 
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "users")
@@ -23,6 +24,21 @@ public class ToDoUser {
     public ToDoUser(String userName, String password) {
         this.userName = userName;
         this.password = password;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ToDoUser)) return false;
+        ToDoUser user = (ToDoUser) o;
+        return id.equals(user.id) &&
+                userName.equals(user.userName) &&
+                password.equals(user.password);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, userName, password);
     }
 
     public Long getId() {

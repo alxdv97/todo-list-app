@@ -1,6 +1,7 @@
 package com.todolist.todo.models;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "todos")
@@ -22,6 +23,21 @@ public class ToDo {
     public ToDo(Long userId, String text) {
         this.userId = userId;
         this.text = text;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ToDo)) return false;
+        ToDo toDo = (ToDo) o;
+        return id.equals(toDo.id) &&
+                userId.equals(toDo.userId) &&
+                text.equals(toDo.text);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, userId, text);
     }
 
     public Long getUserId() {

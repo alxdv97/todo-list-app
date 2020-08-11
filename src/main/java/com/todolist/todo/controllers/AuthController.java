@@ -1,21 +1,29 @@
 package com.todolist.todo.controllers;
 
+import com.todolist.todo.exceptions.UserAlreadyExistException;
 import com.todolist.todo.models.ToDoUser;
 import com.todolist.todo.security.AuthRequest;
 import com.todolist.todo.security.AuthResponse;
 import com.todolist.todo.security.jwt.JwtTokenProvider;
 import com.todolist.todo.security.jwt.blacklist.JwtBlacklistService;
 import com.todolist.todo.services.ToDoUserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.context.WebApplicationContext;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Controller
 public class AuthController {
@@ -42,43 +50,34 @@ public class AuthController {
     @PostMapping("login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
         try {
-            String userName = request.getUserName();
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userName,
-                    request.getPassword()));
-            ToDoUser user = userService.findByUserName(userName);
-
+            ToDoUser user = userService.findByUserName(request.getUserName());
             if (user == null) {
-                throw new UsernameNotFoundException("User with username: " + userName + " not found");
+                throw new UsernameNotFoundException("User with username: "
+                        + user.getUserName() + " not found");
             }
-
-            String token = jwtTokenProvider.createToken(userName);
-
-            return ResponseEntity.ok(new AuthResponse(userName, token));
-        } catch (AuthenticationException e) {
-            throw new BadCredentialsException("Invalid username or password");
+            String token = jwtTokenProvider.createToken(user.getUserName());
+            return new ResponseEntity<>((new AuthResponse(user.getUserName(), token)), HttpStatus.OK);
+        } catch (UsernameNotFoundException e) {
+            return new ResponseEntity<>(new AuthResponse(null, null),
+                    HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping("registration")
-    public ResponseEntity<AuthResponse> registration(@RequestBody ToDoUser user) {
-        userService.register(user);
-        String token = jwtTokenProvider.createToken(user.getUserName());
-        return ResponseEntity.ok(new AuthResponse(user.getUserName(), token));
+    public ResponseEntity<ToDoUser> registration(@RequestBody ToDoUser user) {
+        try {
+            return ResponseEntity.ok(userService.register(user));
+        } catch (UserAlreadyExistException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
-    //TODO: how to get info about user in @GET??
-//    @GetMapping("signout")
-//    public void signout(){
-//
-//    }
-
-    @PostMapping("signout")
-    public ResponseEntity<AuthResponse> logout(@RequestBody AuthRequest request) {
-
-        String token = jwtTokenProvider.createToken(request.getUserName());
+    @GetMapping("signout")
+    public ResponseEntity signout(HttpServletRequest request) {
+        String token = jwtTokenProvider.resolveToken(request);
         blacklistService.storeInBlackList(token);
-
-        return ResponseEntity.ok(new AuthResponse(request.getUserName(), token));
+        SecurityContextHolder.getContext()
+                .getAuthentication().setAuthenticated(false);
+        return new ResponseEntity(HttpStatus.OK);
     }
-
 }

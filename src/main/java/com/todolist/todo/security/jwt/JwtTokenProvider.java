@@ -39,24 +39,28 @@ public class JwtTokenProvider {
     public String createToken(String userName){
         Claims claims = Jwts.claims().setSubject(userName);
 
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + tokenValidTime);
+        Date nowDate = new Date();
+        Date validityDate = new Date(nowDate.getTime() + tokenValidTime);
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(validity)
+                .setIssuedAt(nowDate)
+                .setExpiration(validityDate)
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 
     public Authentication getAuthentication(String token){
-        UserDetails userDetails = this.detailsService.loadUserByUsername(getUserName(token));
+        UserDetails userDetails = this.detailsService
+                .loadUserByUsername(getUserName(token));
+//        UsernamePasswordAuthenticationToken token1 = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
+
     public String getUserName(String token){
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token)
+                .getBody().getSubject();
     }
 
     public String resolveToken(HttpServletRequest req) {
@@ -69,7 +73,8 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token){
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey)
+                    .parseClaimsJws(token);
 
             return !claims.getBody().getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException e) {

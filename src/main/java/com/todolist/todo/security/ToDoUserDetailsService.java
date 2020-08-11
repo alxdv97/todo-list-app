@@ -20,7 +20,8 @@ public class ToDoUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String userName)
+            throws UsernameNotFoundException {
         ToDoUser myUser = repository.findByUserName(userName);
         if (myUser == null) {
             throw new UsernameNotFoundException("Unknown user: " + userName);

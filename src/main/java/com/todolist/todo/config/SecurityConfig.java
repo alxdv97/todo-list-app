@@ -38,15 +38,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .httpBasic().disable()
-                    .csrf().disable()
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    .csrf().disable()//отключаем ненужное
+                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)//отключаем контроль сессий
                 .and()
-                    .authorizeRequests()
-                    .antMatchers(LOGIN_ENDPOINT).permitAll()
-                    .antMatchers(REGISTRATION_ENDPOINT).permitAll()
-                    .anyRequest().authenticated()
+                    .authorizeRequests()//все запросы - авторизированные
+                    .antMatchers(LOGIN_ENDPOINT).permitAll()//разрешить всем страницу авторизации
+                    .antMatchers(REGISTRATION_ENDPOINT).permitAll()//разрашеть всем смтраницу регистрации
+                    .anyRequest().authenticated()//любой запрос от зарегистрированных
                 .and()
-                    .apply(new JwtConfigurer(jwtTokenProvider, jwtBlacklistService));
+                    .apply(new JwtConfigurer(jwtTokenProvider, jwtBlacklistService));//применить jwt-конфигурацию
     }
 
 }

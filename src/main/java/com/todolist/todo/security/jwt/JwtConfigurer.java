@@ -11,14 +11,17 @@ public class JwtConfigurer extends SecurityConfigurerAdapter<DefaultSecurityFilt
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtBlacklistService jwtBlacklistService;
     @Autowired
-    public JwtConfigurer(JwtTokenProvider jwtTokenProvider, JwtBlacklistService jwtBlacklistService) {
+    public JwtConfigurer(JwtTokenProvider jwtTokenProvider,
+                         JwtBlacklistService jwtBlacklistService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.jwtBlacklistService = jwtBlacklistService;
     }
 
     @Override
     public void configure(HttpSecurity httpSecurity) {
-        JwtTokenFilter jwtTokenFilter = new JwtTokenFilter(jwtTokenProvider, jwtBlacklistService);
-        httpSecurity.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+        JwtTokenFilter jwtTokenFilter = new JwtTokenFilter(jwtTokenProvider,
+                jwtBlacklistService);
+        httpSecurity.addFilterBefore(jwtTokenFilter,
+                UsernamePasswordAuthenticationFilter.class);
     }
 }

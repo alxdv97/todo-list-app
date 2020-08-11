@@ -1,5 +1,6 @@
 package com.todolist.todo.services;
 
+import com.todolist.todo.exceptions.UserAlreadyExistException;
 import com.todolist.todo.models.ToDoUser;
 import com.todolist.todo.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +19,13 @@ public class ToDoUserServiceImpl implements ToDoUserService {
     }
 
     @Override
-    public ToDoUser register(ToDoUser user) {
+    public ToDoUser register(ToDoUser user) throws UserAlreadyExistException {
         ToDoUser userForDB = new ToDoUser(user.getUserName(), user.getPassword());
-        return repository.save(userForDB);
+        if (repository.findByUserName(userForDB.getUserName())==null){
+            return repository.save(userForDB);
+        } else {
+            throw new UserAlreadyExistException("User already exist");
+        }
     }
 
     @Override

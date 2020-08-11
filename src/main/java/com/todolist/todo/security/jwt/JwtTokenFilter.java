@@ -18,7 +18,6 @@ public class JwtTokenFilter extends GenericFilterBean {
 
     private final JwtTokenProvider tokenProvider;
 
-    // TODO: strange - cannot autowired
     private final JwtBlacklistService blacklistService;
 
     @Autowired
@@ -27,23 +26,22 @@ public class JwtTokenFilter extends GenericFilterBean {
         this.blacklistService = blacklistService;
     }
 
-
-
-
     @Override
     public void doFilter(ServletRequest servletRequest,
                          ServletResponse servletResponse,
-                         FilterChain filterChain) throws IOException, ServletException {
+                         FilterChain filterChain)
+            throws IOException, ServletException {
         String token = tokenProvider.resolveToken((HttpServletRequest) servletRequest);
 
         if (token != null
                 && tokenProvider.validateToken(token)
-                && !blacklistService.isInBlacklist(token)) {//TODO: add check in blacklist
+                && !blacklistService.isInBlacklist(token)) {
 
             Authentication authentication = tokenProvider.getAuthentication(token);
 
             if (authentication != null) {
-                SecurityContextHolder.getContext().setAuthentication(authentication);//authenticate request
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authentication);//authenticate request
             }
         }
         filterChain.doFilter(servletRequest, servletResponse);
